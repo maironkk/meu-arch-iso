@@ -1,0 +1,31 @@
+name: Build Arch ISO
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar archiso
+        run: pacman -Sy --noconfirm archiso
+
+      - name: Buildar ISO
+        run: |
+          mkdir -p /tmp/work /tmp/out
+          mkarchiso -v -w /tmp/work -o /tmp/out .
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: arch-iso
+          path: /tmp/out/*.iso
+          retention-days: 7
