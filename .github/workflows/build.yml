@@ -8,20 +8,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: archlinux:latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Instalar archiso
-        run: pacman -Sy --noconfirm archiso
+      - name: Instalar dependências
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y arch-install-scripts squashfs-tools xorriso dosfstools mtools libarchive-tools erofs-utils
+
+      - name: Instalar archiso via pacman-static
+        run: |
+          curl -sL https://pkgbuild.com/~morganamilo/pacman-static/x86_64/bin/pacman-static -o /usr/local/bin/pacman-static
+          chmod +x /usr/local/bin/pacman-static
 
       - name: Buildar ISO
         run: |
-          mkdir -p /tmp/work /tmp/out
-          mkarchiso -v -w /tmp/work -o /tmp/out .
+          sudo mkdir -p /tmp/work /tmp/out
+          sudo mkarchiso -v -w /tmp/work -o /tmp/out .
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4
