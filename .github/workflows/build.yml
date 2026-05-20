@@ -13,20 +13,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Instalar dependências
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y arch-install-scripts squashfs-tools xorriso dosfstools mtools libarchive-tools erofs-utils
-
-      - name: Instalar archiso via pacman-static
-        run: |
-          curl -sL https://pkgbuild.com/~morganamilo/pacman-static/x86_64/bin/pacman-static -o /usr/local/bin/pacman-static
-          chmod +x /usr/local/bin/pacman-static
-
-      - name: Buildar ISO
-        run: |
-          sudo mkdir -p /tmp/work /tmp/out
-          sudo mkarchiso -v -w /tmp/work -o /tmp/out .
+      - name: Build ISO
+        uses: 'docker://archlinux:latest'
+        with:
+          args: >-
+            bash -c "
+            pacman -Sy --noconfirm archiso &&
+            mkdir -p /tmp/work /tmp/out &&
+            mkarchiso -v -w /tmp/work -o /tmp/out /github/workspace
+            "
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4
