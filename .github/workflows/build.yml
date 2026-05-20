@@ -14,18 +14,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build ISO
-        uses: 'docker://archlinux:latest'
-        with:
-          args: >-
+        run: |
+          mkdir -p ${{ github.workspace }}/out
+          docker run --privileged --rm \
+            -v ${{ github.workspace }}:/iso \
+            -v ${{ github.workspace }}/out:/out \
+            archlinux:latest \
             bash -c "
-            pacman -Sy --noconfirm archiso &&
-            mkdir -p /tmp/work /tmp/out &&
-            mkarchiso -v -w /tmp/work -o /tmp/out /github/workspace
+              pacman -Sy --noconfirm archiso &&
+              mkdir -p /tmp/work &&
+              mkarchiso -v -w /tmp/work -o /out /iso
             "
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4
         with:
           name: arch-iso
-          path: /tmp/out/*.iso
+          path: ${{ github.workspace }}/out/*.iso
           retention-days: 7
